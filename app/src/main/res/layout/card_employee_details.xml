@@ -8,13 +8,30 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical">
-        <TextView
+
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_margin="5dp"
-            android:textAppearance="@style/Base.TextAppearance.AppCompat.Medium"
-            android:textStyle="bold"
-            android:id="@+id/fullNameCardText"/>
+            android:orientation="horizontal"
+            android:layout_margin="5dp">
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:layout_margin="5dp"
+                android:layout_gravity="center_vertical"
+                android:textAppearance="@style/Base.TextAppearance.AppCompat.Medium"
+                android:textStyle="bold"
+                android:id="@+id/fullNameCardText"/>
+            <ImageView
+                android:layout_width="20dp"
+                android:layout_height="20dp"
+                android:src="@drawable/delete"
+                android:layout_marginRight="10dp"
+                android:tint="@color/colorAccent"
+                android:id="@+id/employeeDeleteBtn"
+                />
+        </LinearLayout>
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"

@@ -1,11 +1,11 @@
 package in.nfly.dell.employeeholidaymanagement;
 
-import android.app.DatePickerDialog;
+import android.content.Context;
 import android.content.DialogInterface;
-import android.content.Intent;
 import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+import android.support.annotation.NonNull;
 import android.support.design.widget.TextInputLayout;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
@@ -17,9 +17,11 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.ArrayAdapter;
-import android.widget.DatePicker;
+import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import java.text.SimpleDateFormat;
@@ -54,16 +56,14 @@ public class MainActivity extends AppCompatActivity {
         final Calendar calendar = Calendar.getInstance();
         month=Integer.toString(calendar.get(Calendar.MONTH));
         date = new SimpleDateFormat("yyyy-MM-dd").format(new Date());
-        H=2;
         employeeRecyclerView=findViewById(R.id.employeeRecyclerView);
         layoutManager=new LinearLayoutManager(MainActivity.this,LinearLayoutManager.VERTICAL,false);
         employeeRecyclerView.setLayoutManager(layoutManager);
 
-        SharedPreferences sharedPreferences=MainActivity.this.getSharedPreferences("APP_PREF_FILE",MODE_PRIVATE);
-        SharedPreferences.Editor editor=sharedPreferences.edit();
-        editor.putString("date",date);
-        editor.putString("month",month);
-        editor.commit();
+        User user=new User(MainActivity.this);
+        H=user.getH();
+        appName=user.getAppName();
+        Toast.makeText(this, H+"\n"+appName, Toast.LENGTH_SHORT).show();
         setValues();
     }
 
@@ -99,7 +99,7 @@ public class MainActivity extends AppCompatActivity {
 
                 optionsTextInputOutput=editOptionsLayout.findViewById(R.id.optionsTextInputOutput);
                 optionsEditText=editOptionsLayout.findViewById(R.id.optionsEditText);
-
+                optionsEditText.setText(Integer.toString(H));
                 optionsTextInputOutput.setHint("H- value");
                 AlertDialog.Builder alertDialog=new AlertDialog.Builder(MainActivity.this);
                 alertDialog.setView(editOptionsLayout);
@@ -116,6 +116,11 @@ public class MainActivity extends AppCompatActivity {
                 alertDialog.setPositiveButton("Submit", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
+                        SharedPreferences sharedPreferences=getSharedPreferences("App Details", Context.MODE_PRIVATE);
+
+                        SharedPreferences.Editor editor=sharedPreferences.edit();
+                        editor.putInt("H",Integer.parseInt(optionsEditText.getText().toString()));
+                        editor.apply();
                     }
                 });
 
@@ -131,6 +136,7 @@ public class MainActivity extends AppCompatActivity {
                 optionsTextInputOutput=editOptionsLayout1.findViewById(R.id.optionsTextInputOutput);
                 optionsEditText=editOptionsLayout1.findViewById(R.id.optionsEditText);
 
+                optionsEditText.setText(appName);
                 optionsTextInputOutput.setHint("App Name");
                 AlertDialog.Builder alertDialog1=new AlertDialog.Builder(MainActivity.this);
                 alertDialog1.setView(editOptionsLayout1);
@@ -147,6 +153,11 @@ public class MainActivity extends AppCompatActivity {
                 alertDialog1.setPositiveButton("Submit", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
+                        SharedPreferences sharedPreferences=getSharedPreferences("App Details", Context.MODE_PRIVATE);
+
+                        SharedPreferences.Editor editor=sharedPreferences.edit();
+                        editor.putString("appName",optionsEditText.getText().toString());
+                        editor.apply();
                     }
                 });
 
@@ -172,7 +183,8 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    private void setValues() {
+    public void setValues() {
+        idDataSet.clear();
         currentBalanceDataSet.clear();
         nameDataSet.clear();
         dateDataSet.clear();
@@ -192,6 +204,7 @@ public class MainActivity extends AppCompatActivity {
                 daysCompletedDataSet.add(cursor.getString(8));
             }while(cursor.moveToNext());
         }
+        Toast.makeText(this, idDataSet.toString(), Toast.LENGTH_SHORT).show();
         adapter=new EmployeeViewAdapter(MainActivity.this,nameDataSet,dateDataSet,daysCompletedDataSet,idDataSet);
         employeeRecyclerView.setAdapter(adapter);
     }
@@ -234,4 +247,63 @@ public class MainActivity extends AppCompatActivity {
         AlertDialog alert=alertDialog.create();
         alert.show();
     }
+
+    public class EmployeeViewAdapter extends RecyclerView.Adapter<EmployeeViewAdapter.EmployeeViewHolder>{
+
+        private Context context;
+        private ArrayList<String> nameDataSet,dateDataSet,currentBalanceDataSet;
+        private ArrayList<Integer> empIdDataSet;
+
+        public EmployeeViewAdapter(Context context, ArrayList<String> nameDataSet, ArrayList<String> dateDataSet, ArrayList<String> currentBalanceDataSet, ArrayList<Integer> idDataSet) {
+            this.context = context;
+            this.nameDataSet = nameDataSet;
+            this.dateDataSet = dateDataSet;
+            this.currentBalanceDataSet = currentBalanceDataSet;
+            this.empIdDataSet = idDataSet;
+        }
+
+        @NonNull
+        @Override
+        public EmployeeViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+            View view= LayoutInflater.from(parent.getContext()).inflate(R.layout.card_employee_details,parent,false);
+            EmployeeViewHolder holder=new EmployeeViewHolder(view);
+            return holder;
+        }
+
+        @Override
+        public void onBindViewHolder(@NonNull EmployeeViewHolder holder, final int position) {
+            holder.fullNameCardText.setText(nameDataSet.get(position));
+            holder.dateCardText.setText(dateDataSet.get(position));
+            holder.currBalanceCardText.setText(currentBalanceDataSet.get(position));
+            holder.employeeDeleteBtn.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    Toast.makeText(context, Integer.toString(empIdDataSet.get(position)), Toast.LENGTH_SHORT).show();
+                    DatabaseHelper databaseHelper = new DatabaseHelper(MainActivity.this);
+                    SQLiteDatabase db = databaseHelper.getWritableDatabase();
+                    databaseHelper.deleteRow(empIdDataSet.get(position),db);
+                    setValues();
+                }
+            });
+        }
+
+        @Override
+        public int getItemCount() {
+            return dateDataSet.size();
+        }
+
+        public class EmployeeViewHolder extends RecyclerView.ViewHolder{
+
+            public TextView fullNameCardText,dateCardText,currBalanceCardText;
+            public ImageView employeeDeleteBtn;
+            public EmployeeViewHolder(View itemView) {
+                super(itemView);
+                fullNameCardText=itemView.findViewById(R.id.fullNameCardText);
+                dateCardText=itemView.findViewById(R.id.dateCardText);
+                currBalanceCardText=itemView.findViewById(R.id.currBalanceCardText);
+                employeeDeleteBtn=itemView.findViewById(R.id.employeeDeleteBtn);
+            }
+        }
+    }
+
 }

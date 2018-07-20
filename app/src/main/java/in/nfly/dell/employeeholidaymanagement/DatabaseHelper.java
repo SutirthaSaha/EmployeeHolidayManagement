@@ -61,6 +61,11 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         return  1;
     }
 
+    public void deleteRow(int value,SQLiteDatabase db)
+    {
+        db.execSQL("delete from users where id="+value);
+        db.close();
+    }
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
 

@@ -21,7 +21,7 @@ public class User {
     }
 
     public String getAppName() {
-        appName=sharedPreferences.getString("appName","");
+        appName=sharedPreferences.getString("appName","HR Manager");
         return appName;
     }
 
@@ -33,7 +33,7 @@ public class User {
 
     public User(Context context) {
         this.context = context;
-        sharedPreferences=context.getSharedPreferences("Login Details",Context.MODE_PRIVATE);
+        sharedPreferences=context.getSharedPreferences("App Details",Context.MODE_PRIVATE);
 
     }
     public void logOut(){
