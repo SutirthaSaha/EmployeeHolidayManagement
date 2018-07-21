@@ -6,17 +6,17 @@ import android.content.SharedPreferences;
 public class User {
     Context context;
     SharedPreferences sharedPreferences;
-    private Integer H;
+    private Float H;
     private String appName;
 
-    public Integer getH() {
-        H=sharedPreferences.getInt("H",0);
+    public Float getH() {
+        H=sharedPreferences.getFloat("H",0);
         return H;
     }
 
-    public void setH(Integer H) {
+    public void setH(Float H) {
         this.H = H;
-        sharedPreferences.edit().putInt("H",H);
+        sharedPreferences.edit().putFloat("H",H);
         sharedPreferences.edit().apply();
     }
 

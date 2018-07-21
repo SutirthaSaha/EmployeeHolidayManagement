@@ -31,10 +31,11 @@ import java.util.Date;
 
 public class MainActivity extends AppCompatActivity {
 
-    private int H;
+    private Float H;
     private String appName;
 
     private String date;
+    private String dayOfMonth;
     private String month;
     private EditText addName,addSurname,optionsEditText;
     private TextInputLayout optionsTextInputOutput;
@@ -48,12 +49,16 @@ public class MainActivity extends AppCompatActivity {
     private ArrayList<String> nameDataSet=new ArrayList<String>(){};
     private ArrayList<String> dateDataSet=new ArrayList<String>(){};
     private ArrayList<String> daysCompletedDataSet=new ArrayList<String>(){};
+    private ArrayList<String> monthsCompletedDataSet=new ArrayList<String>(){};
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
         final Calendar calendar = Calendar.getInstance();
+        dayOfMonth=Integer.toString(calendar.get(Calendar.DAY_OF_MONTH));
+        //Toast.makeText(this, dayOfMonth, Toast.LENGTH_SHORT).show();
         month=Integer.toString(calendar.get(Calendar.MONTH));
         date = new SimpleDateFormat("yyyy-MM-dd").format(new Date());
         employeeRecyclerView=findViewById(R.id.employeeRecyclerView);
@@ -63,7 +68,8 @@ public class MainActivity extends AppCompatActivity {
         User user=new User(MainActivity.this);
         H=user.getH();
         appName=user.getAppName();
-        Toast.makeText(this, H+"\n"+appName, Toast.LENGTH_SHORT).show();
+        getSupportActionBar().setTitle(appName);
+        //Toast.makeText(this, H+"\n"+appName, Toast.LENGTH_SHORT).show();
         setValues();
     }
 
@@ -75,6 +81,7 @@ public class MainActivity extends AppCompatActivity {
         if(cursor.getCount()==0) {
                 Cursor cursor1 = databaseHelper.updateDate(id, date, Integer.toString(Integer.parseInt(daysCompleted)+1),db);
                 if (cursor1.getCount() == 0) {
+                    setValues();
                     Toast.makeText(MainActivity.this, "Date Updated Successfully", Toast.LENGTH_LONG).show();
                 }
             }
@@ -99,7 +106,7 @@ public class MainActivity extends AppCompatActivity {
 
                 optionsTextInputOutput=editOptionsLayout.findViewById(R.id.optionsTextInputOutput);
                 optionsEditText=editOptionsLayout.findViewById(R.id.optionsEditText);
-                optionsEditText.setText(Integer.toString(H));
+                optionsEditText.setText(Float.toString(H));
                 optionsTextInputOutput.setHint("H- value");
                 AlertDialog.Builder alertDialog=new AlertDialog.Builder(MainActivity.this);
                 alertDialog.setView(editOptionsLayout);
@@ -119,8 +126,12 @@ public class MainActivity extends AppCompatActivity {
                         SharedPreferences sharedPreferences=getSharedPreferences("App Details", Context.MODE_PRIVATE);
 
                         SharedPreferences.Editor editor=sharedPreferences.edit();
-                        editor.putInt("H",Integer.parseInt(optionsEditText.getText().toString()));
+                        editor.putFloat("H",Float.parseFloat(optionsEditText.getText().toString()));
                         editor.apply();
+                        User user=new User(MainActivity.this);
+                        H=user.getH();
+                        appName=user.getAppName();
+                        getSupportActionBar().setTitle(appName);
                     }
                 });
 
@@ -129,7 +140,7 @@ public class MainActivity extends AppCompatActivity {
                 return true;
 
             case R.id.menu_app_name:
-                Toast.makeText(MainActivity.this, "App Name is Selected", Toast.LENGTH_SHORT).show();
+                //Toast.makeText(MainActivity.this, "App Name is Selected", Toast.LENGTH_SHORT).show();
                 LayoutInflater layoutInflater1=getLayoutInflater();
                 View editOptionsLayout1=layoutInflater1.inflate(R.layout.dialog_edit_options,null);
 
@@ -146,7 +157,7 @@ public class MainActivity extends AppCompatActivity {
 
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
-                        Toast.makeText(MainActivity.this, "Cancel clicked", Toast.LENGTH_SHORT).show();
+                        //Toast.makeText(MainActivity.this, "Cancel clicked", Toast.LENGTH_SHORT).show();
                     }
                 });
 
@@ -158,6 +169,10 @@ public class MainActivity extends AppCompatActivity {
                         SharedPreferences.Editor editor=sharedPreferences.edit();
                         editor.putString("appName",optionsEditText.getText().toString());
                         editor.apply();
+                        User user=new User(MainActivity.this);
+                        H=user.getH();
+                        appName=user.getAppName();
+                        getSupportActionBar().setTitle(appName);
                     }
                 });
 
@@ -178,7 +193,8 @@ public class MainActivity extends AppCompatActivity {
         if(cursor.getCount()==0) {
                 Cursor cursor1 = databaseHelper.updateDate(id, date,Integer.toString(Integer.parseInt(monthsCompleted)+1), db);
                 if (cursor1.getCount() == 0) {
-                    Toast.makeText(MainActivity.this, "Date Updated Successfully", Toast.LENGTH_LONG).show();
+                    setValues();
+                    Toast.makeText(MainActivity.this, "Month Updated Successfully", Toast.LENGTH_LONG).show();
                 }
         }
     }
@@ -195,17 +211,20 @@ public class MainActivity extends AppCompatActivity {
         cursor.moveToFirst();
         if(cursor.getCount()>0) {
             do{
+
                 updateDateValues(cursor.getInt(0),cursor.getString(8));
                 updateMonthValues(cursor.getInt(0),cursor.getString(7));
                 idDataSet.add(cursor.getInt(0));
-                currentBalanceDataSet.add(Integer.toString(Integer.parseInt(cursor.getString(6))+H*Integer.parseInt(cursor.getString(7))-Integer.parseInt(cursor.getString(9))));
+                currentBalanceDataSet.add(Float.toString(Integer.parseInt(cursor.getString(6))+H*Integer.parseInt(cursor.getString(7))-Integer.parseInt(cursor.getString(9))));
                 nameDataSet.add(cursor.getString(1)+" "+cursor.getString(2));
                 dateDataSet.add(cursor.getString(3));
                 daysCompletedDataSet.add(cursor.getString(8));
+                monthsCompletedDataSet.add(cursor.getString(7));
+
             }while(cursor.moveToNext());
         }
-        Toast.makeText(this, idDataSet.toString(), Toast.LENGTH_SHORT).show();
-        adapter=new EmployeeViewAdapter(MainActivity.this,nameDataSet,dateDataSet,daysCompletedDataSet,idDataSet);
+        //Toast.makeText(this, idDataSet.toString(), Toast.LENGTH_SHORT).show();
+        adapter=new EmployeeViewAdapter(MainActivity.this,nameDataSet,dateDataSet,currentBalanceDataSet,daysCompletedDataSet,monthsCompletedDataSet,idDataSet);
         employeeRecyclerView.setAdapter(adapter);
     }
 
@@ -216,7 +235,7 @@ public class MainActivity extends AppCompatActivity {
         addName=addEmployeeLayout.findViewById(R.id.addName);
         addSurname=addEmployeeLayout.findViewById(R.id.addSurname);
 
-        Toast.makeText(this, month+"\n"+date, Toast.LENGTH_SHORT).show();
+        //Toast.makeText(this, month+"\n"+date, Toast.LENGTH_SHORT).show();
         AlertDialog.Builder alertDialog=new AlertDialog.Builder(MainActivity.this);
         alertDialog.setView(addEmployeeLayout);
         alertDialog.setCancelable(false);
@@ -225,14 +244,14 @@ public class MainActivity extends AppCompatActivity {
 
             @Override
             public void onClick(DialogInterface dialog, int which) {
-                Toast.makeText(MainActivity.this, "Cancel clicked", Toast.LENGTH_SHORT).show();
+                //Toast.makeText(MainActivity.this, "Cancel clicked", Toast.LENGTH_SHORT).show();
             }
         });
 
         alertDialog.setPositiveButton("Submit", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
-                Toast.makeText(MainActivity.this, "Submit clicked", Toast.LENGTH_SHORT).show();
+                //Toast.makeText(MainActivity.this, "Submit clicked", Toast.LENGTH_SHORT).show();
                 DatabaseHelper databaseHelper = new DatabaseHelper(MainActivity.this);
                 SQLiteDatabase db = databaseHelper.getWritableDatabase();
 
@@ -251,15 +270,17 @@ public class MainActivity extends AppCompatActivity {
     public class EmployeeViewAdapter extends RecyclerView.Adapter<EmployeeViewAdapter.EmployeeViewHolder>{
 
         private Context context;
-        private ArrayList<String> nameDataSet,dateDataSet,currentBalanceDataSet;
+        private ArrayList<String> nameDataSet,dateDataSet,currentBalanceDataSet,daysCompletedDataSet,monthsCompltedDataSet;
         private ArrayList<Integer> empIdDataSet;
 
-        public EmployeeViewAdapter(Context context, ArrayList<String> nameDataSet, ArrayList<String> dateDataSet, ArrayList<String> currentBalanceDataSet, ArrayList<Integer> idDataSet) {
+        public EmployeeViewAdapter(Context context, ArrayList<String> nameDataSet, ArrayList<String> dateDataSet, ArrayList<String> currentBalanceDataSet, ArrayList<String> daysCompletedDataSet, ArrayList<String> monthsCompltedDataSet, ArrayList<Integer> empIdDataSet) {
             this.context = context;
             this.nameDataSet = nameDataSet;
             this.dateDataSet = dateDataSet;
             this.currentBalanceDataSet = currentBalanceDataSet;
-            this.empIdDataSet = idDataSet;
+            this.daysCompletedDataSet = daysCompletedDataSet;
+            this.monthsCompltedDataSet = monthsCompltedDataSet;
+            this.empIdDataSet = empIdDataSet;
         }
 
         @NonNull
@@ -272,13 +293,15 @@ public class MainActivity extends AppCompatActivity {
 
         @Override
         public void onBindViewHolder(@NonNull EmployeeViewHolder holder, final int position) {
-            holder.fullNameCardText.setText(nameDataSet.get(position));
-            holder.dateCardText.setText(dateDataSet.get(position));
-            holder.currBalanceCardText.setText(currentBalanceDataSet.get(position));
+            holder.fullNameCardText.setText(this.nameDataSet.get(position));
+            holder.dateCardText.setText(this.dateDataSet.get(position));
+            holder.currBalanceCardText.setText(this.currentBalanceDataSet.get(position));
+            holder.daysCompletedCardText.setText(this.daysCompletedDataSet.get(position));
+            holder.monthsCompletedCardText.setText(this.monthsCompltedDataSet.get(position));
             holder.employeeDeleteBtn.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    Toast.makeText(context, Integer.toString(empIdDataSet.get(position)), Toast.LENGTH_SHORT).show();
+                    //Toast.makeText(context, Integer.toString(empIdDataSet.get(position)), Toast.LENGTH_SHORT).show();
                     DatabaseHelper databaseHelper = new DatabaseHelper(MainActivity.this);
                     SQLiteDatabase db = databaseHelper.getWritableDatabase();
                     databaseHelper.deleteRow(empIdDataSet.get(position),db);
@@ -294,13 +317,15 @@ public class MainActivity extends AppCompatActivity {
 
         public class EmployeeViewHolder extends RecyclerView.ViewHolder{
 
-            public TextView fullNameCardText,dateCardText,currBalanceCardText;
+            public TextView fullNameCardText,dateCardText,currBalanceCardText,daysCompletedCardText,monthsCompletedCardText;
             public ImageView employeeDeleteBtn;
             public EmployeeViewHolder(View itemView) {
                 super(itemView);
                 fullNameCardText=itemView.findViewById(R.id.fullNameCardText);
                 dateCardText=itemView.findViewById(R.id.dateCardText);
                 currBalanceCardText=itemView.findViewById(R.id.currBalanceCardText);
+                daysCompletedCardText=itemView.findViewById(R.id.daysCompletedCardText);
+                monthsCompletedCardText=itemView.findViewById(R.id.monthsCompletedCardText);
                 employeeDeleteBtn=itemView.findViewById(R.id.employeeDeleteBtn);
             }
         }
