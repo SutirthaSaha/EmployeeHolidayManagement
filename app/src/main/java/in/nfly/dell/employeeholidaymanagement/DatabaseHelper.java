@@ -45,6 +45,10 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         Cursor cursor=db.rawQuery("update users set date='"+date+"',daysCompleted='"+daysCompleted+"' where id="+id,null);
         return cursor;
     }
+    public Cursor updateHolidaysTaken(int id,String holidaysTaken,SQLiteDatabase db){
+        Cursor cursor=db.rawQuery("update users set holidaysTaken='"+holidaysTaken+"' where id="+id,null);
+        return cursor;
+    }
     public Cursor updateMonth(int id,String thisMonth,String monthsCompleted,SQLiteDatabase db){
         Cursor cursor=db.rawQuery("update users set thisMonth='"+thisMonth+"',monthsCompleted='"+monthsCompleted+"' where id="+id,null);
         return cursor;

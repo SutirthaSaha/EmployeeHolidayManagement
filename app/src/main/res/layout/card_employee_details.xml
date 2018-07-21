@@ -27,6 +27,15 @@
             <ImageView
                 android:layout_width="20dp"
                 android:layout_height="20dp"
+                android:src="@drawable/pencil"
+                android:layout_marginRight="15dp"
+                android:layout_gravity="center_vertical"
+                android:tint="@color/colorAccent"
+                android:id="@+id/employeeEditBtn"
+                />
+            <ImageView
+                android:layout_width="20dp"
+                android:layout_height="20dp"
                 android:src="@drawable/delete"
                 android:layout_gravity="center_vertical"
                 android:tint="@color/colorAccent"

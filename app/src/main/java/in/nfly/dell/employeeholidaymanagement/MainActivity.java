@@ -34,6 +34,7 @@ public class MainActivity extends AppCompatActivity {
     private Float H;
     private String appName;
 
+    private String holidaysTaken;
     private String date;
     private String dayOfMonth;
     private String month;
@@ -97,7 +98,6 @@ public class MainActivity extends AppCompatActivity {
     @Override
     public boolean onOptionsItemSelected(MenuItem item)
     {
-
         switch (item.getItemId())
         {
             case R.id.menu_h_value:
@@ -191,7 +191,7 @@ public class MainActivity extends AppCompatActivity {
         Cursor cursor=databaseHelper.searchMonth(month,id,db);
         cursor.moveToFirst();
         if(cursor.getCount()==0) {
-                Cursor cursor1 = databaseHelper.updateDate(id, date,Integer.toString(Integer.parseInt(monthsCompleted)+1), db);
+                Cursor cursor1 = databaseHelper.updateMonth(id, month,Integer.toString(Integer.parseInt(monthsCompleted)+1), db);
                 if (cursor1.getCount() == 0) {
                     setValues();
                     Toast.makeText(MainActivity.this, "Month Updated Successfully", Toast.LENGTH_LONG).show();
@@ -218,7 +218,7 @@ public class MainActivity extends AppCompatActivity {
                 currentBalanceDataSet.add(Float.toString(Integer.parseInt(cursor.getString(6))+H*Integer.parseInt(cursor.getString(7))-Integer.parseInt(cursor.getString(9))));
                 nameDataSet.add(cursor.getString(1)+" "+cursor.getString(2));
                 dateDataSet.add(cursor.getString(3));
-                daysCompletedDataSet.add(cursor.getString(8));
+                daysCompletedDataSet.add(cursor.getString(9));
                 monthsCompletedDataSet.add(cursor.getString(7));
 
             }while(cursor.moveToNext());
@@ -308,6 +308,59 @@ public class MainActivity extends AppCompatActivity {
                     setValues();
                 }
             });
+            holder.employeeEditBtn.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    LayoutInflater layoutInflater=getLayoutInflater();
+                    View editOptionsLayout=layoutInflater.inflate(R.layout.dialog_edit_options,null);
+
+                    final DatabaseHelper databaseHelper=new DatabaseHelper(MainActivity.this);
+                    final SQLiteDatabase db=databaseHelper.getReadableDatabase();
+                    Cursor cursor=databaseHelper.viewOneData(empIdDataSet.get(position),db);
+                    cursor.moveToFirst();
+                    if(cursor.getCount()>0) {
+                        holidaysTaken=cursor.getString(9);
+                    }
+                    optionsTextInputOutput=editOptionsLayout.findViewById(R.id.optionsTextInputOutput);
+                    optionsEditText=editOptionsLayout.findViewById(R.id.optionsEditText);
+                    //optionsEditText.setText(holidaysTaken);
+                    optionsTextInputOutput.setHint("Holidays Wanted");
+                    AlertDialog.Builder alertDialog=new AlertDialog.Builder(MainActivity.this);
+                    alertDialog.setView(editOptionsLayout);
+                    alertDialog.setCancelable(false);
+
+                    alertDialog.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            Toast.makeText(MainActivity.this, "Cancel clicked", Toast.LENGTH_SHORT).show();
+                        }
+                    });
+
+                    alertDialog.setPositiveButton("Submit", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            Toast.makeText(MainActivity.this, "Submit clicked", Toast.LENGTH_SHORT).show();
+                            if((Float.parseFloat(currentBalanceDataSet.get(position))-Integer.parseInt(optionsEditText.getText().toString()))>=0)
+                            {
+                                holidaysTaken = Integer.toString(Integer.parseInt(holidaysTaken) + Integer.parseInt(optionsEditText.getText().toString()));
+                                Cursor cursor1 = databaseHelper.updateHolidaysTaken(idDataSet.get(position), holidaysTaken, db);
+                                if (cursor1.getCount() == 0) {
+                                    setValues();
+                                    Toast.makeText(MainActivity.this, "Holidays Taken Updated Successfully", Toast.LENGTH_LONG).show();
+                                }
+                            }
+                            else{
+                                Toast.makeText(context, "Employee not allowed these many holidays", Toast.LENGTH_SHORT).show();
+                            }
+
+                        }
+                    });
+
+                    AlertDialog alert=alertDialog.create();
+                    alert.show();
+                }
+            });
         }
 
         @Override
@@ -318,7 +371,7 @@ public class MainActivity extends AppCompatActivity {
         public class EmployeeViewHolder extends RecyclerView.ViewHolder{
 
             public TextView fullNameCardText,dateCardText,currBalanceCardText,daysCompletedCardText,monthsCompletedCardText;
-            public ImageView employeeDeleteBtn;
+            public ImageView employeeDeleteBtn,employeeEditBtn;
             public EmployeeViewHolder(View itemView) {
                 super(itemView);
                 fullNameCardText=itemView.findViewById(R.id.fullNameCardText);
@@ -327,8 +380,8 @@ public class MainActivity extends AppCompatActivity {
                 daysCompletedCardText=itemView.findViewById(R.id.daysCompletedCardText);
                 monthsCompletedCardText=itemView.findViewById(R.id.monthsCompletedCardText);
                 employeeDeleteBtn=itemView.findViewById(R.id.employeeDeleteBtn);
+                employeeEditBtn=itemView.findViewById(R.id.employeeEditBtn);
             }
         }
     }
-
 }
