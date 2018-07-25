@@ -6,18 +6,18 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 
 public class DatabaseHelper extends SQLiteOpenHelper {
-    private static final String DB_NAME="employee";
+    private static final String DB_NAME="user";
     public DatabaseHelper(Context context) {
         super(context, DB_NAME, null, 1);
     }
 
     @Override
     public void onCreate(SQLiteDatabase db) {
-        db.execSQL("create table users(id integer primary key autoincrement,name text,surname text,joiningDate text,date text,thisMonth text,openingBalance text,monthsCompleted text,daysCompleted text,holidaysTaken text)");
+        db.execSQL("create table users(id integer primary key autoincrement,name text,surname text,joiningDate text,date text,thisMonth text,openingBalance text,monthsCompleted text,daysCompleted text,holidaysTaken text,designation text)");
     }
 
-    public Cursor insertData(String name,String surname,String joiningDate,String date,String thisMonth,SQLiteDatabase db){
-        Cursor cursor=db.rawQuery("insert into users(name,surname,joiningDate,date,thisMonth,openingBalance,monthsCompleted,daysCompleted,holidaysTaken) values ('"+name+"','"+surname+"','"+joiningDate+"','"+date+"','"+thisMonth+"','0','0','0','0')",null);
+    public Cursor insertData(String name,String surname,String joiningDate,String date,String thisMonth,String monthsCompleted,String daysCompleted,String holidaysTaken,String designation,SQLiteDatabase db){
+        Cursor cursor=db.rawQuery("insert into users(name,surname,joiningDate,date,thisMonth,openingBalance,monthsCompleted,daysCompleted,holidaysTaken,designation) values ('"+name+"','"+surname+"','"+joiningDate+"','"+date+"','"+thisMonth+"','0','"+monthsCompleted+"','"+daysCompleted+"','"+holidaysTaken+"','"+designation+"')",null);
         return cursor;
     }
 
