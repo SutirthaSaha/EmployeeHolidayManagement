@@ -143,6 +143,7 @@ public class MainActivity extends AppCompatActivity implements SearchView.OnQuer
                         User user=new User(MainActivity.this);
                         H=user.getH();
                         appName=user.getAppName();
+                        recreate();
                         getSupportActionBar().setTitle(appName);
                     }
                 });
@@ -352,6 +353,20 @@ public class MainActivity extends AppCompatActivity implements SearchView.OnQuer
         }
         adapter.updateList(newList);
         return true;
+    }
+
+    @Override
+    public void recreate()
+    {
+        if (android.os.Build.VERSION.SDK_INT >= 11)
+        {
+            super.recreate();
+        }
+        else
+        {
+            startActivity(getIntent());
+            finish();
+        }
     }
 
     public class EmployeeViewAdapter extends RecyclerView.Adapter<EmployeeViewAdapter.EmployeeViewHolder>{
