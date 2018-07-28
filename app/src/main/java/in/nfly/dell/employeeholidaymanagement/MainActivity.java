@@ -94,7 +94,7 @@ public class MainActivity extends AppCompatActivity implements SearchView.OnQuer
         if(cursor.getCount()==0) {
                 Cursor cursor1 = databaseHelper.updateDate(id, date, Integer.toString(Integer.parseInt(daysCompleted)+1),db);
                 if (cursor1.getCount() == 0) {
-                    setValues();
+                    recreate();
                     Toast.makeText(MainActivity.this, "Date Updated Successfully", Toast.LENGTH_LONG).show();
                 }
             }
@@ -210,7 +210,7 @@ public class MainActivity extends AppCompatActivity implements SearchView.OnQuer
         if(cursor.getCount()==0) {
                 Cursor cursor1 = databaseHelper.updateMonth(id, month,Integer.toString(Integer.parseInt(monthsCompleted)+1), db);
                 if (cursor1.getCount() == 0) {
-                    setValues();
+                    recreate();
                     Toast.makeText(MainActivity.this, "Month Updated Successfully", Toast.LENGTH_LONG).show();
                 }
         }
