@@ -54,13 +54,13 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_margin="10dp"
-        android:hint="Holidays(Till Date)">
+        android:hint="Opening Balance">
         <EditText
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:digits="0123456789."
             android:inputType="numberDecimal"
-            android:id="@+id/addHolidays"/>
+            android:id="@+id/addOpeningBal"/>
     </android.support.design.widget.TextInputLayout>
 
     <android.support.design.widget.TextInputLayout

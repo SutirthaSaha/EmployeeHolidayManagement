@@ -45,7 +45,7 @@ public class MainActivity extends AppCompatActivity implements SearchView.OnQuer
     private String dayOfMonth;
     private String month;
     private Long diff;
-    private EditText addName,addSurname,optionsEditText,addDate,addHolidays,addDesignation;
+    private EditText addName,addSurname,optionsEditText,addDate,addOpeningBalance,addDesignation;
     private ImageView addDateBtn;
     private TextInputLayout optionsTextInputOutput;
 
@@ -59,8 +59,7 @@ public class MainActivity extends AppCompatActivity implements SearchView.OnQuer
     private ArrayList<Integer> idDataSet=new ArrayList<Integer>(){};
     private ArrayList<String> nameDataSet=new ArrayList<String>(){};
     private ArrayList<String> dateDataSet=new ArrayList<String>(){};
-    private ArrayList<String> daysCompletedDataSet=new ArrayList<String>(){};
-    private ArrayList<String> monthsCompletedDataSet=new ArrayList<String>(){};
+    private ArrayList<String> holidaysTakenDataSet=new ArrayList<String>(){};
     private ArrayList<String> designationDataSet=new ArrayList<String>(){};
     private ArrayList<Employee> mainEmployeeDataSet=new ArrayList<Employee>(){};
 
@@ -74,6 +73,7 @@ public class MainActivity extends AppCompatActivity implements SearchView.OnQuer
         //Toast.makeText(this, dayOfMonth, Toast.LENGTH_SHORT).show();
         month=Integer.toString(calendar.get(Calendar.MONTH));
         date = new SimpleDateFormat("dd-MM-yyyy").format(new Date());
+        //date=Integer.toString(calendar.get(Calendar.MINUTE));
         employeeRecyclerView=findViewById(R.id.employeeRecyclerView);
         layoutManager=new LinearLayoutManager(MainActivity.this,LinearLayoutManager.VERTICAL,false);
         employeeRecyclerView.setLayoutManager(layoutManager);
@@ -86,13 +86,13 @@ public class MainActivity extends AppCompatActivity implements SearchView.OnQuer
         setValues();
     }
 
-    private void updateDateValues(final int id,final String daysCompleted) {
+    private void updateDateValues(final int id) {
         DatabaseHelper databaseHelper=new DatabaseHelper(MainActivity.this);
         SQLiteDatabase db=databaseHelper.getReadableDatabase();
         Cursor cursor=databaseHelper.searchDate(date,id,db);
         cursor.moveToFirst();
         if(cursor.getCount()==0) {
-                Cursor cursor1 = databaseHelper.updateDate(id, date, Integer.toString(Integer.parseInt(daysCompleted)+1),db);
+                Cursor cursor1 = databaseHelper.updateDate(id, date,db);
                 if (cursor1.getCount() == 0) {
                     recreate();
                     Toast.makeText(MainActivity.this, "Date Updated Successfully", Toast.LENGTH_LONG).show();
@@ -202,13 +202,37 @@ public class MainActivity extends AppCompatActivity implements SearchView.OnQuer
         }
     }
 
-    private void updateMonthValues(final int id,final String monthsCompleted) {
+    private void updateDateHolidaysValues(final int id,final String openingBalance,final int flag) {
+        DatabaseHelper databaseHelper=new DatabaseHelper(MainActivity.this);
+        SQLiteDatabase db=databaseHelper.getReadableDatabase();
+        Cursor cursor=databaseHelper.searchDate(date,id,db);
+        cursor.moveToFirst();
+        if(cursor.getCount()==0) {
+            Cursor cursor1;
+            if(flag!=0) {
+                cursor1 = databaseHelper.updateDateHolidays(id, date, Float.toString(Float.parseFloat(openingBalance)+H), db);
+            }else{
+                cursor1 = databaseHelper.updateFlag(id, db);
+            }
+            if (cursor1.getCount() == 0) {
+                recreate();
+                Toast.makeText(MainActivity.this, "Date Holidays Updated Successfully", Toast.LENGTH_LONG).show();
+            }
+        }
+    }
+
+    private void updateMonthValues(final int id,final String openingBalance,final int flag) {
         DatabaseHelper databaseHelper=new DatabaseHelper(MainActivity.this);
         SQLiteDatabase db=databaseHelper.getReadableDatabase();
         Cursor cursor=databaseHelper.searchMonth(month,id,db);
         cursor.moveToFirst();
         if(cursor.getCount()==0) {
-                Cursor cursor1 = databaseHelper.updateMonth(id, month,Integer.toString(Integer.parseInt(monthsCompleted)+1), db);
+            Cursor cursor1;
+            if(flag!=0) {
+                cursor1 = databaseHelper.updateMonth(id, month, Float.toString(Float.parseFloat(openingBalance)+H), db);
+            }else{
+                cursor1 = databaseHelper.updateFlag(id, db);
+            }
                 if (cursor1.getCount() == 0) {
                     recreate();
                     Toast.makeText(MainActivity.this, "Month Updated Successfully", Toast.LENGTH_LONG).show();
@@ -222,8 +246,7 @@ public class MainActivity extends AppCompatActivity implements SearchView.OnQuer
         currentBalanceDataSet.clear();
         nameDataSet.clear();
         dateDataSet.clear();
-        daysCompletedDataSet.clear();
-        monthsCompletedDataSet.clear();
+        holidaysTakenDataSet.clear();
         designationDataSet.clear();
         mainEmployeeDataSet.clear();
 
@@ -233,17 +256,15 @@ public class MainActivity extends AppCompatActivity implements SearchView.OnQuer
         cursor.moveToFirst();
         if(cursor.getCount()>0) {
             do{
-
-                updateDateValues(cursor.getInt(0),cursor.getString(8));
-                updateMonthValues(cursor.getInt(0),cursor.getString(7));
+                //updateDateValues(cursor.getInt(0));
+                //updateDateHolidaysValues(cursor.getInt(0),Float.toString(Math.round(Float.parseFloat(cursor.getString(6))-Integer.parseInt(cursor.getString(7)))),cursor.getInt(9));
+                updateMonthValues(cursor.getInt(0),Float.toString(Math.round(Float.parseFloat(cursor.getString(6))-Integer.parseInt(cursor.getString(7)))),cursor.getInt(9));
                 idDataSet.add(cursor.getInt(0));
-                currentBalanceDataSet.add(Float.toString(Math.round(Integer.parseInt(cursor.getString(6))+H*Integer.parseInt(cursor.getString(7))-Integer.parseInt(cursor.getString(9)))));
+                currentBalanceDataSet.add(Float.toString(Math.round(Float.parseFloat(cursor.getString(6))-Integer.parseInt(cursor.getString(7)))));
                 nameDataSet.add(cursor.getString(1)+" "+cursor.getString(2));
                 dateDataSet.add(cursor.getString(3));
-                daysCompletedDataSet.add(cursor.getString(8));
-                monthsCompletedDataSet.add(cursor.getString(7));
-                designationDataSet.add(cursor.getString(10));
-                Employee employee=new Employee(cursor.getString(1)+" "+cursor.getString(2),cursor.getString(3),Float.toString(Math.round(Integer.parseInt(cursor.getString(6))+H*Integer.parseInt(cursor.getString(7))-Integer.parseInt(cursor.getString(9)))),cursor.getString(8),cursor.getString(7),cursor.getString(10),cursor.getInt(0));
+                designationDataSet.add(cursor.getString(8));
+                Employee employee=new Employee(cursor.getString(1)+" "+cursor.getString(2),cursor.getString(3),Float.toString(Math.round(Float.parseFloat(cursor.getString(6))-Integer.parseInt(cursor.getString(7)))),cursor.getString(8),cursor.getInt(0));
                 mainEmployeeDataSet.add(employee);
             }while(cursor.moveToNext());
         }
@@ -261,7 +282,7 @@ public class MainActivity extends AppCompatActivity implements SearchView.OnQuer
         addSurname=addEmployeeLayout.findViewById(R.id.addSurname);
         addDate=addEmployeeLayout.findViewById(R.id.addDate);
         addDateBtn=addEmployeeLayout.findViewById(R.id.addDateBtn);
-        addHolidays=addEmployeeLayout.findViewById(R.id.addHolidays);
+        addOpeningBalance=addEmployeeLayout.findViewById(R.id.addOpeningBal);
         addDesignation=addEmployeeLayout.findViewById(R.id.addDesignation);
 
         final Calendar calendar = Calendar.getInstance();
@@ -315,7 +336,7 @@ public class MainActivity extends AppCompatActivity implements SearchView.OnQuer
                 DatabaseHelper databaseHelper = new DatabaseHelper(MainActivity.this);
                 SQLiteDatabase db = databaseHelper.getWritableDatabase();
 
-                Cursor cursor1 = databaseHelper.insertData(addName.getText().toString().trim(), addSurname.getText().toString().trim(),addDate.getText().toString(),date,month,Long.toString((TimeUnit.DAYS.convert(diff, TimeUnit.MILLISECONDS)/30)),Long.toString(TimeUnit.DAYS.convert(diff, TimeUnit.MILLISECONDS)),addHolidays.getText().toString().trim(),addDesignation.getText().toString().trim(),db);
+                Cursor cursor1 = databaseHelper.insertData(addName.getText().toString().trim(), addSurname.getText().toString().trim(),addDate.getText().toString(),date,month,addOpeningBalance.getText().toString().trim(),addDesignation.getText().toString().trim(),db);
                     if (cursor1.getCount() == 0) {
                         Toast.makeText(MainActivity.this, "Employee Added Successfully", Toast.LENGTH_LONG).show();
                         setValues();
@@ -398,8 +419,6 @@ public class MainActivity extends AppCompatActivity implements SearchView.OnQuer
             holder.fullNameCardText.setText(this.employeeDataSet.get(position).getName());
             holder.dateCardText.setText(this.employeeDataSet.get(position).getDate());
             holder.currBalanceCardText.setText(this.employeeDataSet.get(position).getCurrentBalance());
-            holder.daysCompletedCardText.setText(this.employeeDataSet.get(position).getDaysCompleted());
-            holder.monthsCompletedCardText.setText(this.employeeDataSet.get(position).getMonthsCompleted());
             holder.designationCardText.setText(this.employeeDataSet.get(position).getDesignation());
             holder.employeeDeleteBtn.setOnClickListener(new View.OnClickListener() {
                 @Override
@@ -445,7 +464,7 @@ public class MainActivity extends AppCompatActivity implements SearchView.OnQuer
                     Cursor cursor=databaseHelper.viewOneData(employeeDataSet.get(position).getEmpId(),db);
                     cursor.moveToFirst();
                     if(cursor.getCount()>0) {
-                        holidaysTaken=cursor.getString(9);
+                        holidaysTaken=cursor.getString(7);
                     }
                     optionsTextInputOutput=editOptionsLayout.findViewById(R.id.optionsTextInputOutput);
                     optionsEditText=editOptionsLayout.findViewById(R.id.optionsEditText);
@@ -496,7 +515,7 @@ public class MainActivity extends AppCompatActivity implements SearchView.OnQuer
 
         public class EmployeeViewHolder extends RecyclerView.ViewHolder{
 
-            public TextView fullNameCardText,dateCardText,currBalanceCardText,daysCompletedCardText,monthsCompletedCardText,designationCardText;
+            public TextView fullNameCardText,dateCardText,currBalanceCardText,designationCardText;
             public ImageView employeeDeleteBtn,employeeEditBtn;
             public EmployeeViewHolder(View itemView) {
                 super(itemView);
@@ -504,12 +523,9 @@ public class MainActivity extends AppCompatActivity implements SearchView.OnQuer
                 fullNameCardText=itemView.findViewById(R.id.fullNameCardText);
                 dateCardText=itemView.findViewById(R.id.dateCardText);
                 currBalanceCardText=itemView.findViewById(R.id.currBalanceCardText);
-                daysCompletedCardText=itemView.findViewById(R.id.daysCompletedCardText);
-                monthsCompletedCardText=itemView.findViewById(R.id.monthsCompletedCardText);
                 designationCardText=itemView.findViewById(R.id.designationCardText);
                 employeeDeleteBtn=itemView.findViewById(R.id.employeeDeleteBtn);
                 employeeEditBtn=itemView.findViewById(R.id.employeeEditBtn);
-
             }
         }
     }

@@ -13,11 +13,17 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
     @Override
     public void onCreate(SQLiteDatabase db) {
-        db.execSQL("create table users(id integer primary key autoincrement,name text,surname text,joiningDate text,date text,thisMonth text,openingBalance text,monthsCompleted text,daysCompleted text,holidaysTaken text,designation text)");
+        db.execSQL("create table users(id integer primary key autoincrement,name text,surname text,joining_date text,date text,this_month text,opening_balance text,holidays_taken text,designation text,flag integer)");
     }
 
-    public Cursor insertData(String name,String surname,String joiningDate,String date,String thisMonth,String monthsCompleted,String daysCompleted,String holidaysTaken,String designation,SQLiteDatabase db){
-        Cursor cursor=db.rawQuery("insert into users(name,surname,joiningDate,date,thisMonth,openingBalance,monthsCompleted,daysCompleted,holidaysTaken,designation) values ('"+name+"','"+surname+"','"+joiningDate+"','"+date+"','"+thisMonth+"','0','"+monthsCompleted+"','"+daysCompleted+"','"+holidaysTaken+"','"+designation+"')",null);
+    public Cursor insertData(String name,String surname,String joiningDate,String date,String thisMonth,String openingBalance,String designation,SQLiteDatabase db){
+        Cursor cursor;
+        if(Integer.parseInt(openingBalance)!=0) {
+            cursor = db.rawQuery("insert into users(name,surname,joining_date,date,this_month,opening_balance,holidays_taken,designation,flag) values ('" + name + "','" + surname + "','" + joiningDate + "','" + date + "','" + thisMonth + "','" + openingBalance + "','0','" + designation + "',1)", null);
+        }
+        else{
+            cursor = db.rawQuery("insert into users(name,surname,joining_date,date,this_month,opening_balance,holidays_taken,designation,flag) values ('" + name + "','" + surname + "','" + joiningDate + "','" + date + "','" + thisMonth + "','" + openingBalance + "','0','" + designation + "',0)", null);
+        }
         return cursor;
     }
 
@@ -37,20 +43,28 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     }
 
     public Cursor searchMonth(String thisMonth,int id,SQLiteDatabase db){
-        Cursor cursor=db.rawQuery("select * from users where thisMonth='"+thisMonth+"'and id="+id,null);
+        Cursor cursor=db.rawQuery("select * from users where this_month='"+thisMonth+"'and id="+id,null);
         return cursor;
     }
 
-    public Cursor updateDate(int id,String date,String daysCompleted,SQLiteDatabase db){
-        Cursor cursor=db.rawQuery("update users set date='"+date+"',daysCompleted='"+daysCompleted+"' where id="+id,null);
+    public Cursor updateDate(int id,String date,SQLiteDatabase db){
+        Cursor cursor=db.rawQuery("update users set date='"+date+"' where id="+id,null);
+        return cursor;
+    }
+    public Cursor updateFlag(int id,SQLiteDatabase db){
+        Cursor cursor=db.rawQuery("update users set flag=1 where id="+id,null);
         return cursor;
     }
     public Cursor updateHolidaysTaken(int id,String holidaysTaken,SQLiteDatabase db){
-        Cursor cursor=db.rawQuery("update users set holidaysTaken='"+holidaysTaken+"' where id="+id,null);
+        Cursor cursor=db.rawQuery("update users set holidays_taken='"+holidaysTaken+"' where id="+id,null);
         return cursor;
     }
-    public Cursor updateMonth(int id,String thisMonth,String monthsCompleted,SQLiteDatabase db){
-        Cursor cursor=db.rawQuery("update users set thisMonth='"+thisMonth+"',monthsCompleted='"+monthsCompleted+"' where id="+id,null);
+    public Cursor updateDateHolidays(int id,String date,String openingBalance,SQLiteDatabase db){
+        Cursor cursor=db.rawQuery("update users set date='"+date+"',opening_balance='"+openingBalance+"',holidays_taken='0' where id="+id,null);
+        return cursor;
+    }
+    public Cursor updateMonth(int id,String thisMonth,String openingBalance,SQLiteDatabase db){
+        Cursor cursor=db.rawQuery("update users set this_month='"+thisMonth+"',opening_balance='"+openingBalance+"',holidays_taken='0' where id="+id,null);
         return cursor;
     }
 
