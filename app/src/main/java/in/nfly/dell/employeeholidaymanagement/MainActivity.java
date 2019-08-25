@@ -340,6 +340,7 @@ public class MainActivity extends AppCompatActivity implements SearchView.OnQuer
                     if (cursor1.getCount() == 0) {
                         Toast.makeText(MainActivity.this, "Employee Added Successfully", Toast.LENGTH_LONG).show();
                         setValues();
+
                     }
                 }
         });
